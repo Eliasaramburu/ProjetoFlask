@@ -1,0 +1,46 @@
+/* static/css/estilocontatos.css */
+
+body {
+    font-family: Arial, sans-serif;
+    line-height: 1.8;
+    background-color: #F4f4f4;
+    color: #333;
+}
+
+nav {
+    background: #336;
+    color: #fff;
+    padding: 10px;
+}
+
+nav ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+nav ul li {
+    display: inline;
+    margin-right: 10px;
+}
+
+nav ul li a {
+    color: #fff;
+    text-decoration: none;
+}
+
+nav ul li a:hover {
+    text-decoration: underline;
+}
+
+h1 {
+    text-align: center;
+    color: #333;
+}
+
+img {
+    display: block;
+    margin: 0 auto;
+    max-width: 100%;
+    height: auto;
+}
