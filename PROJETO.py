@@ -1,4 +1,5 @@
 from flask import Flask, render_template, request, redirect, url_for, flash
+import os
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
 
@@ -6,6 +7,7 @@ app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///usuarios.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.secret_key = 'sua_chave_secreta'
+app.config['UPLOAD_FOLDER'] = 'static/uploads'  # Pasta onde as fotos serão salvas
 
 db = SQLAlchemy(app)
 
@@ -15,6 +17,7 @@ class Usuario(db.Model):
     nome = db.Column(db.String(150), nullable=False)
     email = db.Column(db.String(150), unique=True, nullable=False)
     senha = db.Column(db.String(150), nullable=False)
+    foto_perfil = db.Column(db.String(150), nullable=True)
 
 # Criação do banco de dados
 with app.app_context():
@@ -39,30 +42,30 @@ def criarconta():
         email = request.form['email']
         senha = request.form['senha']
 
-        # Primeiro Verificar se o usuário já existe
+        # Verificar se o usuário já existe
         if Usuario.query.filter_by(email=email).first():
             flash('Email já existe!')
             return redirect(url_for('criarconta'))
 
-        #então cria um novo
-
-        # Criar um novo usuário - verifica se as variáveis nome, email e senha existem
+        # Criar um novo usuário
         if nome and email and senha:
             try:
                 senha_hash = generate_password_hash(senha)
+
                 novo_usuario = Usuario(nome=nome, email=email, senha=senha_hash)
                 db.session.add(novo_usuario)
-                db.session.commit() #é usado para salvar as mudanças feitas na sessão atual do banco de dados.
+                db.session.commit()
                 flash('Usuário criado com sucesso!')
 
                 return redirect(url_for('acesso'))
 
             except Exception as e:
-                db.session.rollback()  # Reverte a sessão em caso de erro
+                db.session.rollback()
                 flash(f'Erro ao criar usuário: {e}')
                 return redirect(url_for('criarconta'))
 
     return render_template('criarconta.html')
+
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -74,11 +77,30 @@ def login():
 
         # Verificação das credenciais
         if usuario and check_password_hash(usuario.senha, senha):
-            return redirect(url_for('inicio'))  # Redirecionar para a página inicial
+            return redirect(url_for('perfil', user_id=usuario.id))  # Passar o ID do usuário
         else:
             flash('Usuário ou senha incorretos!')
 
     return render_template('acesso.html')
+
+@app.route('/perfil/<int:user_id>', methods=['GET', 'POST'])
+def perfil(user_id):
+    usuario = Usuario.query.get_or_404(user_id)
+
+    if request.method == 'POST':
+        foto_perfil = request.files.get('foto_perfil')
+
+        if foto_perfil:
+            foto_caminho = os.path.join(app.config['UPLOAD_FOLDER'], foto_perfil.filename)
+            foto_perfil.save(foto_caminho)
+
+            # Atualiza o caminho da foto no banco de dados
+            usuario.foto_perfil = foto_caminho
+            db.session.commit()
+            flash('Foto de perfil atualizada com sucesso!')
+
+    return render_template('perfil.html', usuario=usuario)
+
 
 if __name__ == '__main__':
     app.run(debug=True)

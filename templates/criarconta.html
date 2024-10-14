@@ -17,7 +17,7 @@
 
     <h1>Criar Conta</h1>
 
-    <form action="{{ url_for('criarconta') }}" method="post">
+    <form method="POST">
         <label for="nome">Nome de Usuário:</label>
         <input type="text" id="nome" name="nome" required>
         <br>
@@ -27,26 +27,24 @@
         <br>
 
         <label for="senha">Senha:</label>
-        <input type="password" id="senha" name="senha" required> <!-- Corrigido de 'senha' para 'password' -->
+        <input type="password" id="senha" name="senha" required>
         <br>
 
-        <button type="submit">INSCREVER-SE</button>
-
-
-        <button type="submit">Deletar Usuários</button>
+        <button type="submit">Criar Conta</button>
     </form>
 
     <form method="post">
-    <input type="hidden" name="acao" value="limpar">
-    <button type="submit" style="color: white;">APAGAR TODOS OS USUÁRIOS</button>
-</form>
+        <input type="hidden" name="acao" value="limpar">
+        <button type="submit" style="color: white;">APAGAR TODOS OS USUÁRIOS</button>
+    </form>
+
     <!-- Mensagens de Flash -->
     {% with messages = get_flashed_messages() %}
         {% if messages %}
             <ul>
-            {% for message in messages %}
-                <li style="color: red;">{{ message }}</li>
-            {% endfor %}
+                {% for message in messages %}
+                    <li style="color: red;">{{ message }}</li>
+                {% endfor %}
             </ul>
         {% endif %}
     {% endwith %}
